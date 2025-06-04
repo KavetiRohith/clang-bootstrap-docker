@@ -136,21 +136,21 @@ RUN cmake -G Ninja /src/llvm-17/llvm \
   -DCMAKE_INSTALL_PREFIX=${INSTALL_STAGE3} \
   -DCMAKE_C_COMPILER=/opt/llvm15-bootstrap-toolchain/bin/clang \
   -DCMAKE_CXX_COMPILER=/opt/llvm15-bootstrap-toolchain/bin/clang++ \
-  -DLLVM_TEMPORARILY_ALLOW_OLD_TOOLCHAIN=ON \
   -DLLVM_ENABLE_LIBCXX=ON \
   -DCLANG_DEFAULT_CXX_STDLIB=libc++ \
   # Tell clang to prefer lld from previous toolchain
   -DCLANG_DEFAULT_LINKER=lld \ 
   -DLLVM_ENABLE_TERMINFO=OFF \
   -DLIBCXX_ENABLE_STATIC=ON \
-  -DLIBCXX_ENABLE_SHARED=OFF \
+  # -DLIBCXX_ENABLE_SHARED=OFF \
   -DLIBCXXABI_ENABLE_STATIC=ON \
-  -DLIBCXXABI_ENABLE_SHARED=OFF \
+  # -DLIBCXXABI_ENABLE_SHARED=OFF \
   -DLIBUNWIND_ENABLE_STATIC=ON \
-  -DLIBUNWIND_ENABLE_SHARED=OFF \
+  # -DLIBUNWIND_ENABLE_SHARED=OFF \
   -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
   -DLIBCXX_USE_COMPILER_RT=OFF \
   -DLIBCXX_CXX_ABI=libcxxabi \
+  -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   # Ensure libcxx is built with thread support
   -DLIBCXX_ENABLE_THREADS=ON \ 
   # Ensure libcxxabi is built with thread support
@@ -167,8 +167,8 @@ RUN cmake -G Ninja /src/llvm-17/llvm \
 RUN ninja install
 
 # Package the LLVM 17 toolchain
-WORKDIR /opt
-RUN zip -r clang17-glibc223.zip $(basename ${INSTALL_STAGE3})
+WORKDIR /opt/clang-llvm17-final
+RUN tar -cJf clang17-glibc223.tar.xz .
 
 # ----------------------------------------------------------------
 # Final export stages
@@ -180,10 +180,10 @@ COPY --from=stage2 /opt/clang-glibc223.zip /clang15-glibc223.zip
 
 # Export stage for LLVM 17 toolchain
 FROM scratch AS export-llvm17
-COPY --from=stage3 /opt/clang17-glibc223.zip /clang17-glibc223.zip
+COPY --from=stage3 /opt/clang17-glibc223.tar.xz /clang17-glibc223.tar.xz
 
 # Default export: Makes LLVM 17 the default artifact if no specific target is chosen
 FROM export-llvm17 AS export
 # The COPY in the alias target (export-llvm17) defines what's in 'export'
 # No specific COPY needed here as it inherits from export-llvm17.
-# The final image 'export' will contain /clang17-glibc223.zip
+# The final image 'export' will contain /clang17-glibc223.tar.xz
