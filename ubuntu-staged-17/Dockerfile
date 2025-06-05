@@ -131,7 +131,7 @@ WORKDIR /build3
 RUN cmake -G Ninja /src/llvm-17/llvm \
   -DCMAKE_BUILD_TYPE=Release \
   -DLLVM_ENABLE_PROJECTS="clang;lld" \
-  -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind" \
+  -DLLVM_ENABLE_RUNTIMES="libcxx;libcxxabi;libunwind;compiler-rt" \
   -DLLVM_TARGETS_TO_BUILD="X86" \
   -DCMAKE_INSTALL_PREFIX=${INSTALL_STAGE3} \
   -DCMAKE_C_COMPILER=/opt/llvm15-bootstrap-toolchain/bin/clang \
@@ -141,16 +141,24 @@ RUN cmake -G Ninja /src/llvm-17/llvm \
   # Tell clang to prefer lld from previous toolchain
   -DCLANG_DEFAULT_LINKER=lld \ 
   -DLLVM_ENABLE_TERMINFO=OFF \
-  -DLIBCXX_ENABLE_STATIC=ON \
-  # -DLIBCXX_ENABLE_SHARED=OFF \
-  -DLIBCXXABI_ENABLE_STATIC=ON \
-  # -DLIBCXXABI_ENABLE_SHARED=OFF \
-  -DLIBUNWIND_ENABLE_STATIC=ON \
-  # -DLIBUNWIND_ENABLE_SHARED=OFF \
-  -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
-  -DLIBCXX_USE_COMPILER_RT=OFF \
-  -DLIBCXX_CXX_ABI=libcxxabi \
+  # -DLIBCXX_ENABLE_STATIC=ON \
+  # -DLIBCXX_ENABLE_SHARED=ON \
+  # -DLIBCXXABI_ENABLE_STATIC=ON \
+  # -DLIBCXXABI_ENABLE_SHARED=ON \
+  # -DLIBUNWIND_ENABLE_STATIC=ON \
+  # -DLIBUNWIND_ENABLE_SHARED=ON \
+  # -DLIBCXX_ENABLE_STATIC_ABI_LIBRARY=ON \
+  -DLLVM_OPTIMIZED_TABLEGEN=ON \
+  -DLLVM_INCLUDE_DOCS=OFF \
+  -DLLVM_ENABLE_RTTI=ON \
+  -DLLVM_ENABLE_EH=ON \
+  -DLLVM_INCLUDE_EXAMPLES=OFF \
+  -DLLVM_INCLUDE_TESTS=OFF \
+  -DLIBCXX_USE_COMPILER_RT=ON \
+  -DLIBCXXABI_USE_COMPILER_RT=ON \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
+  -DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON \
+  -DLIBCXX_CXX_ABI=libcxxabi \
   # Ensure libcxx is built with thread support
   -DLIBCXX_ENABLE_THREADS=ON \ 
   # Ensure libcxxabi is built with thread support
@@ -168,7 +176,7 @@ RUN ninja install
 
 # Package the LLVM 17 toolchain
 WORKDIR /opt/clang-llvm17-final
-RUN tar -cJf clang17-glibc223.tar.xz .
+RUN tar -cJf ../clang17-glibc223.tar.xz .
 
 # ----------------------------------------------------------------
 # Final export stages
