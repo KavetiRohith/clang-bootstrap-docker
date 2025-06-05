@@ -176,6 +176,8 @@ RUN ninja install
 
 # Package the LLVM 17 toolchain
 WORKDIR /opt/clang-llvm17-final
+# link x86_64-unknown-linux-gnu to enable easy discovery of libc++.so
+RUN ln -sf lib/x86_64-unknown-linux-gnu/* lib/
 RUN tar -cJf ../clang17-glibc223.tar.xz .
 
 # ----------------------------------------------------------------
