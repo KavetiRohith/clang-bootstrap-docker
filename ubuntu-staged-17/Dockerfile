@@ -159,6 +159,11 @@ RUN cmake -G Ninja /src/llvm-17/llvm \
   -DLIBCXXABI_USE_LLVM_UNWINDER=ON \
   -DLLVM_BUILD_EXTERNAL_COMPILER_RT=ON \
   -DLIBCXX_CXX_ABI=libcxxabi \
+  # When enabled (set to ON), the built runtime libraries 
+  # will be installed in directories named after the target triple, 
+  # for example, clang/17.0.0/lib/x86_64-unknown-linux-gnu/.
+  # boost's b2 doesn't seem to like this - hence disabling
+  -DLLVM_ENABLE_PER_TARGET_RUNTIME_DIR=OFF \
   # Ensure libcxx is built with thread support
   -DLIBCXX_ENABLE_THREADS=ON \ 
   # Ensure libcxxabi is built with thread support
